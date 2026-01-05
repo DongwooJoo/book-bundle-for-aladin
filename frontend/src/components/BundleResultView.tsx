@@ -17,7 +17,12 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
   const hasMoreSellers = sellers.length > INITIAL_DISPLAY_COUNT;
 
   return (
-    <div className="apple-card apple-card-bordered" style={{ padding: '32px' }}>
+    <div 
+      className="apple-card apple-card-bordered" 
+      style={{ padding: '32px' }}
+      onMouseEnter={(e) => e.currentTarget.style.transform = 'none'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
         <div>
@@ -145,13 +150,22 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
               return (
                 <div
                   key={seller.sellerCode}
-                  className="rounded-xl overflow-hidden"
+                  className="rounded-xl overflow-hidden seller-card"
                   style={{
                     backgroundColor: 'var(--color-background-tertiary)',
                     border: isComplete 
                       ? '2px solid var(--color-green)' 
                       : '1px solid var(--color-border)',
-                    transition: 'all var(--transition-fast)'
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   {/* Seller Header */}
