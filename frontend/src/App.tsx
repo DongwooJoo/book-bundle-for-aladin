@@ -160,7 +160,7 @@ function App() {
             className="flex flex-col items-center justify-center"
             style={{ minHeight: 'calc(100vh - 52px - 80px)' }}
           >
-            <div className="w-full max-w-2xl px-6 py-16 text-center">
+            <div className="w-full px-6 py-16 text-center" style={{ maxWidth: '720px' }}>
               {/* Logo & Title */}
               <div className="mb-8 animate-fadeInUp">
                 <div 

@@ -348,7 +348,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
             </p>
           </div>
           
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '480px', overflowY: 'auto' }}>
             {searchResults.map((book) => (
               <div
                 key={book.itemId}
@@ -384,11 +384,15 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
                 {/* Book Info */}
                 <div className="flex-1 min-w-0">
                   <h3 
-                    className="truncate"
                     style={{ 
                       fontSize: '15px',
                       fontWeight: 'var(--font-weight-medium)',
-                      color: 'var(--color-text-primary)'
+                      color: 'var(--color-text-primary)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      lineHeight: '1.4'
                     }}
                   >
                     {book.title}
