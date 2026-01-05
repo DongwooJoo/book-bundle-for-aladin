@@ -66,7 +66,6 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onKeyPress={handleKeyPress}
-              onFocus={() => searchResults.length > 0 && setShowResults(true)}
               placeholder="책 추가..."
               style={{
                 width: '100%',
