@@ -22,9 +22,11 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [importedFromExtension, setImportedFromExtension] = useState(false);
+  const [showBookList, setShowBookList] = useState(false);
+  const [addedBookAnimation, setAddedBookAnimation] = useState<{ id: number; title: string } | null>(null);
 
-  // 컴팩트 모드: 책이 추가되었거나 결과가 있을 때
-  const isCompactMode = books.length > 0 || bundleResult !== null;
+  // 컴팩트 모드: 책 목록 보기를 클릭했거나 결과가 있을 때
+  const isCompactMode = showBookList || bundleResult !== null;
 
   // 확장에서 전달받은 데이터를 BookItem 형식으로 변환
   const convertExtensionData = useCallback((data: ExtensionBookData[]): BookItem[] => {
@@ -75,6 +77,10 @@ function App() {
   const handleAddBook = (book: BookItem) => {
     if (books.some((b) => b.itemId === book.itemId)) return;
     setBooks([...books, book]);
+    
+    // 책 추가 애니메이션
+    setAddedBookAnimation({ id: book.itemId, title: book.title });
+    setTimeout(() => setAddedBookAnimation(null), 1500);
   };
 
   const handleRemoveBook = (itemId: number) => {
@@ -121,6 +127,7 @@ function App() {
                 setBooks([]);
                 setBundleResult(null);
                 setError(null);
+                setShowBookList(false);
               }}
             >
               <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -140,17 +147,62 @@ function App() {
               </span>
             </a>
 
-            {/* Compact mode: Show book count in nav */}
-            {isCompactMode && books.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="apple-tag apple-tag-blue">
-                  {books.length}권 선택
-                </span>
-              </div>
+            {/* Book basket button */}
+            {books.length > 0 && (
+              <button
+                onClick={() => setShowBookList(true)}
+                className="flex items-center gap-2"
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'var(--color-blue)',
+                  color: 'white',
+                  borderRadius: '980px',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M2 4h2l2 9h8l2-7H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  <circle cx="7" cy="15" r="1" fill="currentColor"/>
+                  <circle cx="13" cy="15" r="1" fill="currentColor"/>
+                </svg>
+                <span>내 책 목록 ({books.length})</span>
+              </button>
             )}
           </div>
         </div>
       </nav>
+
+      {/* Book Added Animation Toast */}
+      {addedBookAnimation && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '70px',
+            right: '24px',
+            backgroundColor: 'var(--color-green)',
+            color: 'white',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            animation: 'flyToCart 0.5s ease-out'
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+            <path d="M6 10L9 13L14 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span style={{ fontWeight: 500 }}>책이 담겼습니다!</span>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1">
@@ -220,10 +272,10 @@ function App() {
                 selectedBookIds={books.map((b) => b.itemId)}
                 compact={true}
               />
-            </div>
+        </div>
 
             {/* Extension Import Notification */}
-            {importedFromExtension && (
+        {importedFromExtension && (
               <div 
                 className="apple-notification apple-notification-success mb-6 animate-scaleIn"
               >
@@ -239,16 +291,16 @@ function App() {
                   </p>
                   <p className="text-caption mt-1">
                     등급을 확인하고 판매자 찾기를 시작하세요.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setImportedFromExtension(false)}
+              </p>
+            </div>
+            <button
+              onClick={() => setImportedFromExtension(false)}
                   className="apple-button apple-button-secondary apple-button-small"
-                >
+            >
                   닫기
-                </button>
-              </div>
-            )}
+            </button>
+          </div>
+        )}
 
             {/* Error Message */}
             {error && (
@@ -264,21 +316,21 @@ function App() {
                     오류가 발생했습니다
                   </p>
                   <p className="text-caption mt-1">{error}</p>
-                </div>
-              </div>
-            )}
+          </div>
+          </div>
+        )}
 
             {/* Book List */}
             {books.length > 0 && !bundleResult && (
               <div className="mb-6 animate-fadeInUp">
-                <BookList
-                  books={books}
-                  onRemoveBook={handleRemoveBook}
-                  onUpdateQuality={handleUpdateQuality}
-                  onAnalyze={handleAnalyze}
-                  isAnalyzing={isAnalyzing}
-                />
-              </div>
+          <BookList
+            books={books}
+            onRemoveBook={handleRemoveBook}
+            onUpdateQuality={handleUpdateQuality}
+            onAnalyze={handleAnalyze}
+            isAnalyzing={isAnalyzing}
+          />
+        </div>
             )}
 
             {/* Bundle Result */}
