@@ -5,13 +5,15 @@ import { searchBooks } from '../api/bookApi';
 interface BookSearchProps {
   onAddBook: (book: BookItem) => void;
   selectedBookIds: number[];
+  compact?: boolean;
 }
 
-export function BookSearch({ onAddBook, selectedBookIds }: BookSearchProps) {
+export function BookSearch({ onAddBook, selectedBookIds, compact = false }: BookSearchProps) {
   const [keyword, setKeyword] = useState('');
   const [searchResults, setSearchResults] = useState<BookSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(false);
 
   const handleSearch = async () => {
     if (!keyword.trim()) return;
@@ -22,8 +24,9 @@ export function BookSearch({ onAddBook, selectedBookIds }: BookSearchProps) {
     try {
       const results = await searchBooks(keyword);
       setSearchResults(results);
+      setShowResults(true);
     } catch (err) {
-      setError('검색에 실패했습니다. 백엔드 서버가 실행 중인지 확인해주세요.');
+      setError('검색에 실패했습니다. 서버 연결을 확인해주세요.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -51,114 +54,385 @@ export function BookSearch({ onAddBook, selectedBookIds }: BookSearchProps) {
 
   const isSelected = (itemId: number) => selectedBookIds.includes(itemId);
 
+  // ============ COMPACT MODE ============
+  if (compact) {
+    return (
+      <div className="relative">
+        {/* Compact Search Bar - Minimal */}
+        <div className="flex gap-2 items-center">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyPress={handleKeyPress}
+              onFocus={() => searchResults.length > 0 && setShowResults(true)}
+              placeholder="책 추가..."
+              style={{
+                width: '100%',
+                padding: '8px 12px 8px 36px',
+                fontSize: '14px',
+                backgroundColor: 'var(--color-background-tertiary)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '8px',
+                outline: 'none',
+                transition: 'all 0.15s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--color-text-tertiary)';
+                if (searchResults.length > 0) setShowResults(true);
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--color-border)';
+              }}
+            />
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              fill="none" 
+              style={{ 
+                position: 'absolute', 
+                left: '12px', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                color: 'var(--color-text-tertiary)'
+              }}
+            >
+              <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <button
+            onClick={handleSearch}
+            disabled={isLoading || !keyword.trim()}
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: 500,
+              backgroundColor: 'var(--color-text-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              opacity: (!keyword.trim() || isLoading) ? 0.4 : 1,
+              transition: 'opacity 0.15s ease'
+            }}
+          >
+            {isLoading ? '...' : '검색'}
+          </button>
+        </div>
+
+        {/* Dropdown Results */}
+        {showResults && searchResults.length > 0 && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 z-10"
+              onClick={() => setShowResults(false)}
+            />
+            
+            {/* Results Dropdown */}
+            <div 
+              className="absolute left-0 right-0 mt-2 z-20 rounded-xl overflow-hidden animate-scaleIn"
+              style={{
+                backgroundColor: 'var(--color-background)',
+                border: '1px solid var(--color-border)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                maxHeight: '400px',
+                overflowY: 'auto'
+              }}
+            >
+              <div className="p-2">
+                <p className="text-caption px-3 py-2">
+                  검색 결과 {searchResults.length}건
+                </p>
+                {searchResults.map((book) => (
+                  <button
+                    key={book.itemId}
+                    onClick={() => {
+                      handleAddBook(book);
+                    }}
+                    disabled={isSelected(book.itemId)}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors"
+                    style={{
+                      backgroundColor: isSelected(book.itemId) 
+                        ? 'var(--color-background-tertiary)' 
+                        : 'transparent',
+                      opacity: isSelected(book.itemId) ? 0.6 : 1
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected(book.itemId)) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = isSelected(book.itemId) 
+                        ? 'var(--color-background-tertiary)' 
+                        : 'transparent';
+                    }}
+                  >
+                    {/* Cover */}
+                    <div 
+                      style={{
+                        width: '40px',
+                        height: '52px',
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        backgroundColor: 'var(--color-background-tertiary)',
+                        flexShrink: 0
+                      }}
+                    >
+                      {book.cover && <img src={book.cover} alt="" className="w-full h-full object-cover" />}
+                    </div>
+                    
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p 
+                        className="truncate"
+                        style={{ 
+                          fontSize: '14px', 
+                          fontWeight: 'var(--font-weight-medium)',
+                          color: 'var(--color-text-primary)'
+                        }}
+                      >
+                        {book.title}
+                      </p>
+                      <p 
+                        className="truncate"
+                        style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}
+                      >
+                        {book.author}
+                      </p>
+                    </div>
+                    
+                    {/* Status */}
+                    {isSelected(book.itemId) ? (
+                      <span className="apple-tag" style={{ fontSize: '11px' }}>추가됨</span>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ color: 'var(--color-text-primary)' }}>
+                        <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                        <line x1="10" y1="6" x2="10" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        <line x1="6" y1="10" x2="14" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Error */}
+        {error && (
+          <p className="text-center mt-3" style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // ============ FULL MODE (Google-like) ============
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <span className="text-2xl">🔍</span>
-        책 검색
-      </h2>
-      
-      {/* 검색 입력 */}
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="책 제목을 입력하세요"
-          className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-        />
-        <button
-          onClick={handleSearch}
-          disabled={isLoading || !keyword.trim()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-        >
-          {isLoading ? '검색 중...' : '검색'}
-        </button>
+    <div className="w-full">
+      {/* Main Search Box */}
+      <div 
+        className="rounded-2xl overflow-hidden transition-all"
+        style={{
+          backgroundColor: 'var(--color-background)',
+          border: '1px solid var(--color-border)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+        }}
+      >
+        {/* Search Input */}
+        <div className="flex items-center gap-3 p-4">
+          <svg 
+            width="22" 
+            height="22" 
+            viewBox="0 0 22 22" 
+            fill="none" 
+            style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }}
+          >
+            <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+            <line x1="15" y1="15" x2="20" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="책 제목, 저자, ISBN으로 검색"
+            className="flex-1"
+            style={{
+              fontSize: '18px',
+              border: 'none',
+              outline: 'none',
+              backgroundColor: 'transparent',
+              color: 'var(--color-text-primary)'
+            }}
+          />
+          {keyword && (
+            <button
+              onClick={() => setKeyword('')}
+              style={{ 
+                padding: '4px',
+                color: 'var(--color-text-tertiary)'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="7" fill="currentColor"/>
+                <line x1="6" y1="6" x2="12" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="12" y1="6" x2="6" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Search Button */}
+        <div className="px-4 pb-4">
+          <button
+            onClick={handleSearch}
+            disabled={isLoading || !keyword.trim()}
+            className="apple-button apple-button-primary w-full"
+            style={{ 
+              height: '48px',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '16px',
+              fontWeight: 'var(--font-weight-medium)'
+            }}
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="apple-spinner" />
+                검색 중...
+              </span>
+            ) : (
+              '책 검색'
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* 에러 메시지 */}
+      {/* Error Message */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div 
+          className="mt-4 p-4 rounded-xl text-center"
+          style={{ 
+            backgroundColor: 'var(--color-background-tertiary)',
+            color: 'var(--color-text-secondary)'
+          }}
+        >
           {error}
         </div>
       )}
 
-      {/* 검색 결과 */}
+      {/* Search Results */}
       {searchResults.length > 0 && (
-        <div className="space-y-3 max-h-96 overflow-y-auto">
-          <p className="text-sm text-gray-500 mb-2">
-            검색 결과: {searchResults.length}건
-          </p>
-          {searchResults.map((book) => (
-            <div
-              key={book.itemId}
-              className={`flex items-center gap-4 p-4 rounded-lg border transition-all ${
-                isSelected(book.itemId)
-                  ? 'border-blue-300 bg-blue-50'
-                  : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              {/* 책 표지 */}
-              <div className="w-16 h-20 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
-                {book.cover ? (
-                  <img
-                    src={book.cover}
-                    alt={book.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    📚
-                  </div>
-                )}
-              </div>
-              
-              {/* 책 정보 */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-800 truncate">{book.title}</h3>
-                <p className="text-sm text-gray-500 truncate">
-                  {book.author} {book.publisher && `| ${book.publisher}`}
-                </p>
-                <div className="flex items-center gap-3 mt-1">
-                  {book.priceStandard && (
-                    <span className="text-sm text-gray-400">
-                      정가 {book.priceStandard.toLocaleString()}원
-                    </span>
-                  )}
-                  {book.usedCount !== undefined && book.usedCount > 0 && (
-                    <span className="text-sm text-green-600">
-                      중고 {book.usedCount}개
-                    </span>
+        <div 
+          className="mt-4 rounded-2xl overflow-hidden"
+          style={{
+            backgroundColor: 'var(--color-background)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <div className="p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
+            <p style={{ 
+              fontSize: '14px',
+              fontWeight: 'var(--font-weight-medium)',
+              color: 'var(--color-text-secondary)'
+            }}>
+              검색 결과 {searchResults.length}건
+            </p>
+          </div>
+          
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {searchResults.map((book) => (
+              <div
+                key={book.itemId}
+                className="flex items-center gap-4 p-4 border-b transition-colors"
+                style={{ 
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: isSelected(book.itemId) 
+                    ? 'var(--color-background-tertiary)' 
+                    : 'transparent'
+                }}
+              >
+                {/* Book Cover */}
+                <div 
+                  style={{
+                    width: '50px',
+                    height: '66px',
+                    borderRadius: 'var(--radius-sm)',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--color-background-tertiary)',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                  }}
+                >
+                  {book.cover ? (
+                    <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--color-text-tertiary)' }}>
+                      📚
+                    </div>
                   )}
                 </div>
+                
+                {/* Book Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 
+                    className="truncate"
+                    style={{ 
+                      fontSize: '15px',
+                      fontWeight: 'var(--font-weight-medium)',
+                      color: 'var(--color-text-primary)'
+                    }}
+                  >
+                    {book.title}
+                  </h3>
+                  <p 
+                    className="truncate mt-0.5"
+                    style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}
+                  >
+                    {book.author}{book.publisher && ` · ${book.publisher}`}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {book.priceStandard && (
+                      <span className="apple-tag" style={{ fontSize: '11px' }}>
+                        정가 {book.priceStandard.toLocaleString()}원
+                      </span>
+                    )}
+                    {book.usedCount !== undefined && book.usedCount > 0 && (
+                      <span className="apple-tag apple-tag-green" style={{ fontSize: '11px' }}>
+                        중고 {book.usedCount}개
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Add Button */}
+                <button
+                  onClick={() => handleAddBook(book)}
+                  disabled={isSelected(book.itemId)}
+                  className="apple-button apple-button-small"
+                  style={{
+                    backgroundColor: isSelected(book.itemId) 
+                      ? 'var(--color-background-tertiary)' 
+                      : 'var(--color-text-primary)',
+                    color: isSelected(book.itemId) 
+                      ? 'var(--color-text-tertiary)' 
+                      : 'white',
+                    flexShrink: 0
+                  }}
+                >
+                  {isSelected(book.itemId) ? '추가됨' : '+ 추가'}
+                </button>
               </div>
-              
-              {/* 추가 버튼 */}
-              <button
-                onClick={() => handleAddBook(book)}
-                disabled={isSelected(book.itemId)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isSelected(book.itemId)
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                }`}
-              >
-                {isSelected(book.itemId) ? '추가됨' : '+ 추가'}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {/* 빈 상태 */}
-      {searchResults.length === 0 && !isLoading && !error && (
-        <div className="text-center py-8 text-gray-400">
-          <span className="text-4xl mb-2 block">📖</span>
-          <p>책 제목을 검색해서 목록에 추가하세요</p>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
-
