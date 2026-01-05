@@ -243,8 +243,7 @@ function App() {
                 </div>
                 <button
                   onClick={() => setImportedFromExtension(false)}
-                  className="apple-button-link"
-                  style={{ fontSize: '14px' }}
+                  className="apple-button apple-button-secondary apple-button-small"
                 >
                   닫기
                 </button>
