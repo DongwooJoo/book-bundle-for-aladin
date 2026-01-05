@@ -76,12 +76,12 @@
 }
 
 .apple-button-primary {
-  background-color: var(--color-text-primary);
+  background-color: var(--color-blue);
   color: white;
 }
 
 .apple-button-primary:hover:not(:disabled) {
-  background-color: #000000;
+  background-color: var(--color-blue-hover);
 }
 
 .apple-button-secondary {

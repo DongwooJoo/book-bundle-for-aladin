@@ -110,7 +110,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
               padding: '8px 16px',
               fontSize: '14px',
               fontWeight: 500,
-              backgroundColor: 'var(--color-text-primary)',
+              backgroundColor: 'var(--color-blue)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -419,7 +419,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
                   style={{
                     backgroundColor: isSelected(book.itemId) 
                       ? 'var(--color-background-tertiary)' 
-                      : 'var(--color-text-primary)',
+                      : 'var(--color-blue)',
                     color: isSelected(book.itemId) 
                       ? 'var(--color-text-tertiary)' 
                       : 'white',
