@@ -348,7 +348,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
             </p>
           </div>
           
-          <div style={{ maxHeight: '480px', overflowY: 'auto' }}>
+          <div>
             {searchResults.map((book) => (
               <div
                 key={book.itemId}
