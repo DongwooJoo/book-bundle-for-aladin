@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>알라딘 북번들</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>📚 북번들</h1>
+      <p class="subtitle">알라딘 장바구니 책 추출</p>
+    </header>
+
+    <main class="main">
+      <!-- 상태 메시지 -->
+      <div id="status" class="status">
+        <div class="status-icon">⏳</div>
+        <div class="status-text">페이지 확인 중...</div>
+      </div>
+
+      <!-- 책 목록 (추출 후 표시) -->
+      <div id="book-list" class="book-list" style="display: none;">
+        <div class="book-count">
+          <span id="book-count-number">0</span>권 발견
+        </div>
+        <ul id="books"></ul>
+      </div>
+
+      <!-- 버튼 영역 -->
+      <div class="actions">
+        <button id="extract-btn" class="btn btn-primary" disabled>
+          📥 책 정보 추출
+        </button>
+        <button id="send-btn" class="btn btn-success" style="display: none;">
+          🚀 북번들로 전송
+        </button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>알라딘 장바구니 페이지에서 사용하세요</p>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

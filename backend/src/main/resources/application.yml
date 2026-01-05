@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: book-bundle
+
+# 알라딘 크롤링 설정
+aladin:
+  base-url: https://www.aladin.co.kr
+  request-delay-ms: 500  # 요청 간격 (알라딘 서버 부하 고려)
+  user-agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+
+# CORS 설정 (프론트엔드 연동)
+cors:
+  allowed-origins: http://localhost:5173
+
