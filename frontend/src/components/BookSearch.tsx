@@ -70,20 +70,23 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
               placeholder="책 추가..."
               style={{
                 width: '100%',
-                padding: '8px 12px 8px 36px',
-                fontSize: '14px',
-                backgroundColor: 'var(--color-background-tertiary)',
+                padding: '10px 14px 10px 40px',
+                fontSize: '15px',
+                backgroundColor: 'var(--color-background)',
                 border: '1px solid var(--color-border)',
-                borderRadius: '8px',
+                borderRadius: '980px',
                 outline: 'none',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.2s ease',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-text-tertiary)';
+                e.currentTarget.style.borderColor = 'var(--color-blue)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 113, 227, 0.1)';
                 if (searchResults.length > 0) setShowResults(true);
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'var(--color-border)';
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
               }}
             />
             <svg 
@@ -93,7 +96,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
               fill="none" 
               style={{ 
                 position: 'absolute', 
-                left: '12px', 
+                left: '14px', 
                 top: '50%', 
                 transform: 'translateY(-50%)',
                 color: 'var(--color-text-tertiary)'
@@ -107,16 +110,16 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
             onClick={handleSearch}
             disabled={isLoading || !keyword.trim()}
             style={{
-              padding: '8px 16px',
-              fontSize: '14px',
+              padding: '10px 20px',
+              fontSize: '15px',
               fontWeight: 500,
               backgroundColor: 'var(--color-blue)',
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '980px',
               cursor: 'pointer',
               opacity: (!keyword.trim() || isLoading) ? 0.4 : 1,
-              transition: 'opacity 0.15s ease'
+              transition: 'all 0.2s ease'
             }}
           >
             {isLoading ? '...' : '검색'}
