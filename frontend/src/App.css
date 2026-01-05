@@ -170,12 +170,12 @@
 }
 
 .apple-tag-blue {
-  background-color: var(--color-text-primary);
+  background-color: var(--color-blue);
   color: white;
 }
 
 .apple-tag-green {
-  background-color: var(--color-text-primary);
+  background-color: var(--color-green);
   color: white;
 }
 
@@ -222,8 +222,8 @@
 }
 
 .apple-spinner-dark {
-  border-color: rgba(0, 0, 0, 0.1);
-  border-top-color: var(--color-text-secondary);
+  border-color: rgba(0, 113, 227, 0.2);
+  border-top-color: var(--color-blue);
 }
 
 @keyframes spin {

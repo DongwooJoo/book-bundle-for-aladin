@@ -79,7 +79,7 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
               width: '48px', 
               height: '48px',
               borderRadius: '50%',
-              backgroundColor: 'var(--color-text-primary)',
+              backgroundColor: 'var(--color-green)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -149,7 +149,7 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
                   style={{
                     backgroundColor: 'var(--color-background-tertiary)',
                     border: isComplete 
-                      ? '2px solid var(--color-text-primary)' 
+                      ? '2px solid var(--color-green)' 
                       : '1px solid var(--color-border)',
                     transition: 'all var(--transition-fast)'
                   }}
@@ -165,15 +165,20 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
                             height: '32px',
                             borderRadius: '50%',
                             backgroundColor: index === 0 
-                              ? 'var(--color-text-primary)' 
-                              : 'var(--color-background)',
-                            color: index === 0 ? 'white' : 'var(--color-text-secondary)',
+                              ? 'var(--color-blue)' 
+                              : index === 1
+                              ? 'var(--color-blue)'
+                              : index === 2
+                              ? 'var(--color-blue)'
+                              : 'var(--color-background-tertiary)',
+                            color: index < 3 ? 'white' : 'var(--color-text-secondary)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '14px',
                             fontWeight: 'var(--font-weight-semibold)',
-                            border: index > 0 ? '1px solid var(--color-border)' : 'none'
+                            opacity: index === 0 ? 1 : index === 1 ? 0.8 : index === 2 ? 0.6 : 1,
+                            border: index >= 3 ? '1px solid var(--color-border)' : 'none'
                           }}
                         >
                           {index + 1}

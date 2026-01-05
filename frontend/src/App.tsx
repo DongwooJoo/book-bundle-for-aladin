@@ -169,7 +169,7 @@ function App() {
                     width: '80px',
                     height: '80px',
                     borderRadius: '24px',
-                    backgroundColor: 'var(--color-text-primary)',
+                    backgroundColor: 'var(--color-blue)',
                     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
                   }}
                 >
@@ -229,7 +229,7 @@ function App() {
               >
                 <div 
                   className="apple-notification-icon"
-                  style={{ backgroundColor: 'var(--color-text-primary)', color: 'white' }}
+                  style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
                 >
                   ✓
                 </div>
@@ -255,7 +255,7 @@ function App() {
               <div className="apple-notification apple-notification-error mb-6 animate-scaleIn">
                 <div 
                   className="apple-notification-icon"
-                  style={{ backgroundColor: 'var(--color-text-primary)', color: 'white' }}
+                  style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
                 >
                   !
                 </div>

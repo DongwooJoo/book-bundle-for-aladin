@@ -97,7 +97,7 @@ export function BookList({
                     width: '24px',
                     height: '24px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--color-text-primary)',
+                    backgroundColor: 'var(--color-blue)',
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
