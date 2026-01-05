@@ -352,24 +352,41 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
             {searchResults.map((book) => (
               <div
                 key={book.itemId}
-                className="flex items-center gap-4 p-4 border-b transition-colors"
+                onClick={() => !isSelected(book.itemId) && handleAddBook(book)}
+                className="flex items-center gap-4 p-4 border-b"
                 style={{ 
                   borderColor: 'var(--color-border)',
                   backgroundColor: isSelected(book.itemId) 
                     ? 'var(--color-background-tertiary)' 
-                    : 'transparent'
+                    : 'transparent',
+                  cursor: isSelected(book.itemId) ? 'default' : 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected(book.itemId)) {
+                    e.currentTarget.style.transform = 'scale(1.01)';
+                    e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
+                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = isSelected(book.itemId) 
+                    ? 'var(--color-background-tertiary)' 
+                    : 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 {/* Book Cover */}
                 <div 
                   style={{
-                    width: '50px',
-                    height: '66px',
+                    width: '56px',
+                    height: '74px',
                     borderRadius: 'var(--radius-sm)',
                     overflow: 'hidden',
                     backgroundColor: 'var(--color-background-tertiary)',
                     flexShrink: 0,
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                   }}
                 >
                   {book.cover ? (
@@ -385,7 +402,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
                 <div className="flex-1 min-w-0">
                   <h3 
                     style={{ 
-                      fontSize: '15px',
+                      fontSize: '16px',
                       fontWeight: 'var(--font-weight-medium)',
                       color: 'var(--color-text-primary)',
                       display: '-webkit-box',
@@ -398,42 +415,62 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false }: Book
                     {book.title}
                   </h3>
                   <p 
-                    className="truncate mt-0.5"
-                    style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}
+                    className="truncate mt-1"
+                    style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}
                   >
                     {book.author}{book.publisher && ` · ${book.publisher}`}
                   </p>
-                  <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex items-center gap-2 mt-2">
                     {book.priceStandard && (
-                      <span className="apple-tag" style={{ fontSize: '11px' }}>
+                      <span className="apple-tag" style={{ fontSize: '12px' }}>
                         정가 {book.priceStandard.toLocaleString()}원
                       </span>
                     )}
                     {book.usedCount !== undefined && book.usedCount > 0 && (
-                      <span className="apple-tag apple-tag-green" style={{ fontSize: '11px' }}>
+                      <span className="apple-tag apple-tag-green" style={{ fontSize: '12px' }}>
                         중고 {book.usedCount}개
                       </span>
                     )}
                   </div>
                 </div>
                 
-                {/* Add Button */}
-                <button
-                  onClick={() => handleAddBook(book)}
-                  disabled={isSelected(book.itemId)}
-                  className="apple-button apple-button-small"
-                  style={{
-                    backgroundColor: isSelected(book.itemId) 
-                      ? 'var(--color-background-tertiary)' 
-                      : 'var(--color-blue)',
-                    color: isSelected(book.itemId) 
-                      ? 'var(--color-text-tertiary)' 
-                      : 'white',
-                    flexShrink: 0
-                  }}
-                >
-                  {isSelected(book.itemId) ? '추가됨' : '+ 추가'}
-                </button>
+                {/* Status Indicator */}
+                <div style={{ flexShrink: 0 }}>
+                  {isSelected(book.itemId) ? (
+                    <div 
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--color-green)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M3 7L6 10L11 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  ) : (
+                    <div 
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--color-blue)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <line x1="7" y1="3" x2="7" y2="11" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="3" y1="7" x2="11" y2="7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
