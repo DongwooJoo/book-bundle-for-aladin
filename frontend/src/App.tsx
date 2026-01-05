@@ -162,7 +162,8 @@ function App() {
                   fontWeight: 500,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  position: 'relative'
+                  position: 'relative',
+                  animation: addedBookAnimation ? 'cartBounce 0.5s ease' : 'none'
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -171,6 +172,27 @@ function App() {
                   <circle cx="13" cy="15" r="1" fill="currentColor"/>
                 </svg>
                 <span>내 책 목록 ({books.length})</span>
+                {addedBookAnimation && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      width: '20px',
+                      height: '20px',
+                      backgroundColor: 'var(--color-green)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      animation: 'popIn 0.3s ease'
+                    }}
+                  >
+                    +1
+                  </span>
+                )}
               </button>
             )}
           </div>
