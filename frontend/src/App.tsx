@@ -289,7 +289,6 @@ function App() {
                   maxHeight: hasSearchResults ? '0px' : '60px',
                   opacity: hasSearchResults ? 0 : 1,
                   marginTop: hasSearchResults ? '0' : '16px',
-                  paddingTop: '8px'
                 }}
               >
                 <p style={{ 
@@ -297,25 +296,10 @@ function App() {
                   color: 'var(--color-text-secondary)',
                   lineHeight: 1.5
                 }}>
-                  여러 책을 한 판매자에게서 구매하고 배송비를 아끼세요
+                  중고 책을 한 판매자에게서 구매하고 배송비를 아끼세요
                 </p>
               </div>
 
-              {/* Tips - More compact (Collapsible) */}
-              <div 
-                className="overflow-hidden transition-all duration-300"
-                style={{ 
-                  maxHeight: hasSearchResults ? '0px' : '60px',
-                  opacity: hasSearchResults ? 0 : 1,
-                  marginTop: hasSearchResults ? '0' : '32px'
-                }}
-              >
-                <div className="flex flex-wrap justify-center gap-2">
-                  <span className="apple-tag" style={{ fontSize: '11px' }}>1. 책 검색</span>
-                  <span className="apple-tag" style={{ fontSize: '11px' }}>2. 2권 이상 추가</span>
-                  <span className="apple-tag" style={{ fontSize: '11px' }}>3. 판매자 찾기</span>
-                </div>
-              </div>
             </div>
           </div>
         ) : (
