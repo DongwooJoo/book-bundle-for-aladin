@@ -26,6 +26,7 @@ function App() {
   const [addedBookAnimation, setAddedBookAnimation] = useState<{ id: number; title: string; key: number } | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [hasSearchResults, setHasSearchResults] = useState(false);
+  const [searchResetKey, setSearchResetKey] = useState(0);
 
   // 스크롤 위치 감지
   useEffect(() => {
@@ -148,6 +149,9 @@ function App() {
                 setBundleResult(null);
                 setError(null);
                 setShowBookList(false);
+                setHasSearchResults(false);
+                setImportedFromExtension(false);
+                setSearchResetKey(prev => prev + 1);
               }}
             >
               <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -270,6 +274,7 @@ function App() {
               {/* Search Box */}
               <div>
                 <BookSearch
+                  key={`search-full-${searchResetKey}`}
                   onAddBook={handleAddBook}
                   selectedBookIds={books.map((b) => b.itemId)}
                   compact={false}
@@ -319,6 +324,7 @@ function App() {
             {/* Compact Search */}
             <div className="mb-6">
               <BookSearch
+                key={`search-compact-${searchResetKey}`}
                 onAddBook={handleAddBook}
                 selectedBookIds={books.map((b) => b.itemId)}
                 compact={true}

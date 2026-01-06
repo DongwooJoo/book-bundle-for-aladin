@@ -21,6 +21,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false, onSear
     
     setIsLoading(true);
     setError(null);
+    onSearchStateChange?.(true); // 검색 시작 시 바로 검색창 위로 올리기
     
     try {
       const results = await searchBooks(keyword);
@@ -124,12 +125,21 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false, onSear
               transition: 'all 0.2s ease'
             }}
           >
-            {isLoading ? '...' : '검색'}
+            검색
           </button>
         </div>
 
+        {/* Loading Dropdown */}
+        {isLoading && (
+          <div 
+            className="absolute left-0 right-0 mt-4 z-20 flex items-center justify-center"
+          >
+            <div className="apple-spinner apple-spinner-dark" style={{ width: '28px', height: '28px' }} />
+          </div>
+        )}
+
         {/* Dropdown Results */}
-        {showResults && searchResults.length > 0 && (
+        {!isLoading && showResults && searchResults.length > 0 && (
           <>
             {/* Backdrop */}
             <div 
@@ -318,21 +328,17 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false, onSear
           e.currentTarget.style.borderColor = 'var(--color-border)';
         }}
       >
-        {/* Search Icon / Loading */}
-        {isLoading ? (
-          <div className="apple-spinner apple-spinner-dark" style={{ width: '20px', height: '20px', flexShrink: 0 }} />
-        ) : (
-          <svg 
-            width="20" 
-            height="20" 
-            viewBox="0 0 20 20" 
-            fill="none" 
-            style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }}
-          >
-            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-            <line x1="13.5" y1="13.5" x2="18" y2="18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        )}
+        {/* Search Icon */}
+        <svg 
+          width="20" 
+          height="20" 
+          viewBox="0 0 20 20" 
+          fill="none" 
+          style={{ color: 'var(--color-text-tertiary)', flexShrink: 0 }}
+        >
+          <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
         
         <input
           type="text"
@@ -385,8 +391,15 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false, onSear
         </div>
       )}
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="mt-8 flex items-center justify-center py-12">
+          <div className="apple-spinner apple-spinner-dark" style={{ width: '32px', height: '32px' }} />
+        </div>
+      )}
+
       {/* Search Results */}
-      {searchResults.length > 0 && (
+      {!isLoading && searchResults.length > 0 && (
         <div 
           className="mt-4 mb-4 rounded-2xl overflow-hidden"
           style={{
@@ -420,7 +433,7 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false, onSear
                 }}
                 onMouseEnter={(e) => {
                   if (!isSelected(book.itemId)) {
-                    e.currentTarget.style.transform = 'scale(1.01)';
+                    e.currentTarget.style.transform = 'scale(1.02)';
                     e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
                     e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
                   }
@@ -494,21 +507,21 @@ export function BookSearch({ onAddBook, selectedBookIds, compact = false, onSear
                       style={{
                         padding: '8px 12px',
                         borderRadius: '12px',
-                        backgroundColor: 'rgba(52, 199, 89, 0.1)',
+                        backgroundColor: 'var(--color-background-tertiary)',
                         flexShrink: 0
                       }}
                     >
                       <span style={{ 
                         fontSize: '18px', 
                         fontWeight: 'var(--font-weight-semibold)',
-                        color: 'var(--color-green)',
+                        color: 'var(--color-text-primary)',
                         lineHeight: 1
                       }}>
                         {book.usedCount}
                       </span>
                       <span style={{ 
                         fontSize: '11px', 
-                        color: 'var(--color-green)',
+                        color: 'var(--color-text-secondary)',
                         marginTop: '2px'
                       }}>
                         중고

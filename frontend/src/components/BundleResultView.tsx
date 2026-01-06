@@ -175,8 +175,7 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
                     border: isComplete 
                       ? '2px solid var(--color-green)' 
                       : '1px solid var(--color-border)',
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer'
+                    transition: 'all 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'scale(1.02)';
@@ -261,7 +260,8 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
                           backgroundColor: expandedSellers.has(seller.sellerCode) 
                             ? 'var(--color-background)' 
                             : 'var(--color-background)',
-                          border: '1px dashed var(--color-border)'
+                          border: '1px dashed var(--color-border)',
+                          cursor: 'pointer'
                         }}
                       >
                         <span style={{ 

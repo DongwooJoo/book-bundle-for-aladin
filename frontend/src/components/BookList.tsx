@@ -238,10 +238,7 @@ export function BookList({
             }}
           >
             {isAnalyzing ? (
-              <span className="flex items-center justify-center gap-3">
-                <span className="apple-spinner" />
-                분석 중...
-              </span>
+              <span className="apple-spinner" />
             ) : (
               `판매자 찾기`
             )}
