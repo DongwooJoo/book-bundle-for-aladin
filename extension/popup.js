@@ -14,6 +14,29 @@ const sendBtn = document.getElementById('send-btn');
 // 추출된 책 데이터
 let extractedBooks = [];
 
+// 상태별 SVG 아이콘
+const STATUS_ICONS = {
+  loading: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/>
+  </svg>`,
+  success: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M4 7L6 9L10 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  error: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M4 4L10 10M10 4L4 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+  warning: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M7 4v4M7 10v0.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+  empty: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  </svg>`,
+  rocket: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M10 4L6 8M4 9l1 1M2 11l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M11 3c0 2-2 4-4 6l-1-1c2-2 4-4 6-4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  </svg>`
+};
+
 // 초기화
 document.addEventListener('DOMContentLoaded', async () => {
   await checkCurrentPage();
@@ -25,25 +48,25 @@ async function checkCurrentPage() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
     if (tab.url && tab.url.includes('aladin.co.kr/shop/wbasket.aspx')) {
-      setStatus('success', '✅', '알라딘 장바구니 페이지입니다');
+      setStatus('success', 'success', '알라딘 장바구니 페이지입니다');
       extractBtn.disabled = false;
     } else if (tab.url && tab.url.includes('aladin.co.kr')) {
-      setStatus('warning', '⚠️', '장바구니 페이지로 이동해주세요');
+      setStatus('warning', 'warning', '장바구니 페이지로 이동해주세요');
       extractBtn.disabled = true;
     } else {
-      setStatus('error', '❌', '알라딘 사이트가 아닙니다');
+      setStatus('error', 'error', '알라딘 사이트가 아닙니다');
       extractBtn.disabled = true;
     }
   } catch (error) {
     console.error('페이지 확인 오류:', error);
-    setStatus('error', '❌', '페이지를 확인할 수 없습니다');
+    setStatus('error', 'error', '페이지를 확인할 수 없습니다');
   }
 }
 
 // 상태 표시 업데이트
 function setStatus(type, icon, text) {
   statusEl.className = `status ${type}`;
-  statusIconEl.textContent = icon;
+  statusIconEl.innerHTML = STATUS_ICONS[icon] || STATUS_ICONS.loading;
   statusTextEl.textContent = text;
 }
 
@@ -51,7 +74,7 @@ function setStatus(type, icon, text) {
 extractBtn.addEventListener('click', async () => {
   try {
     extractBtn.disabled = true;
-    setStatus('', '⏳', '책 정보를 추출하는 중...');
+    setStatus('', 'loading', '책 정보를 추출하는 중...');
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
@@ -66,20 +89,20 @@ extractBtn.addEventListener('click', async () => {
       
       if (extractedBooks.length > 0) {
         displayBooks(extractedBooks);
-        setStatus('success', '✅', `${extractedBooks.length}권의 책을 찾았습니다`);
-        sendBtn.style.display = 'block';
+        setStatus('success', 'success', `${extractedBooks.length}권의 책을 찾았습니다`);
+        sendBtn.style.display = 'flex';
         extractBtn.style.display = 'none';
       } else {
-        setStatus('warning', '📭', '장바구니가 비어있습니다');
+        setStatus('warning', 'empty', '장바구니가 비어있습니다');
         extractBtn.disabled = false;
       }
     } else {
-      setStatus('error', '❌', '책 정보를 추출할 수 없습니다');
+      setStatus('error', 'error', '책 정보를 추출할 수 없습니다');
       extractBtn.disabled = false;
     }
   } catch (error) {
     console.error('추출 오류:', error);
-    setStatus('error', '❌', '추출 중 오류가 발생했습니다');
+    setStatus('error', 'error', '추출 중 오류가 발생했습니다');
     extractBtn.disabled = false;
   }
 });
@@ -96,9 +119,9 @@ function displayBooks(books) {
                          book.quality === '상' ? 'good' : 'fair';
     
     li.innerHTML = `
-      <img src="${book.cover || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 44"><rect fill="%23e2e8f0" width="32" height="44"/><text x="16" y="24" text-anchor="middle" fill="%2394a3b8" font-size="8">📚</text></svg>'}" 
+      <img src="${book.cover || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 48"><rect fill="%23f5f5f7" width="36" height="48" rx="4"/><text x="18" y="28" text-anchor="middle" fill="%2386868b" font-size="16">📚</text></svg>'}" 
            alt="${book.title}" 
-           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 44%22><rect fill=%22%23e2e8f0%22 width=%2232%22 height=%2244%22/></svg>'">
+           onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 36 48%22><rect fill=%22%23f5f5f7%22 width=%2236%22 height=%2248%22 rx=%224%22/></svg>'">
       <div class="book-info">
         <div class="book-title" title="${book.title}">${book.title}</div>
         <div class="book-meta">${book.price ? book.price.toLocaleString() + '원' : ''}</div>
@@ -116,7 +139,7 @@ function displayBooks(books) {
 sendBtn.addEventListener('click', async () => {
   try {
     sendBtn.disabled = true;
-    setStatus('', '🚀', '북번들로 전송 중...');
+    setStatus('', 'rocket', '북번들로 전송 중...');
 
     // 데이터를 Base64로 인코딩하여 URL 해시로 전달 (가장 안정적)
     const encodedData = btoa(encodeURIComponent(JSON.stringify(extractedBooks)));
@@ -126,7 +149,7 @@ sendBtn.addEventListener('click', async () => {
       url: `${BOOKBUNDLE_URL}?from=extension#data=${encodedData}` 
     });
 
-    setStatus('success', '✅', '전송 완료! 북번들 탭을 확인하세요');
+    setStatus('success', 'success', '전송 완료! 북번들 탭을 확인하세요');
     
     // 1.5초 후 팝업 닫기
     setTimeout(() => {
@@ -135,7 +158,7 @@ sendBtn.addEventListener('click', async () => {
 
   } catch (error) {
     console.error('전송 오류:', error);
-    setStatus('error', '❌', '전송 중 오류가 발생했습니다');
+    setStatus('error', 'error', '전송 중 오류가 발생했습니다');
     sendBtn.disabled = false;
   }
 });
@@ -189,4 +212,3 @@ function extractCartItems() {
   
   return items;
 }
-

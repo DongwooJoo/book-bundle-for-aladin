@@ -36,6 +36,8 @@ public class AladinCrawlerService {
     private static final Pattern SC_PATTERN = Pattern.compile("SC=(\\d+)");
     private static final Pattern ITEM_ID_PATTERN = Pattern.compile("ItemId=(\\d+)");
     private static final Pattern PRICE_PATTERN = Pattern.compile("([\\d,]+)원");
+    // 화살표 뒤의 실제 판매가 패턴 (17,000원→13,980원 형식에서 판매가 추출)
+    private static final Pattern SELLING_PRICE_PATTERN = Pattern.compile("→([\\d,]+)원");
     
     // 중고 상품 ID -> 원본 책 ID 매핑 캐시 (중복 요청 방지)
     private final Map<Long, Long> originalIdCache = new HashMap<>();
@@ -342,23 +344,39 @@ public class AladinCrawlerService {
             // 제목 유사도 확인 (정규화된 제목으로 비교)
             if (isTitleMatch(linkTitle, bookTitle)) {
                 // 가격, 등급 추출
-                Element row = link.closest("tr, .ss_book_box, div[class*='book']");
+                Element row = link.closest("tr, td, .ss_book_box, div[class*='book'], li");
                 int price = 0;
                 String quality = "중";
                 
                 if (row != null) {
                     String rowText = row.text();
                     
-                    // 가격 추출
-                    Matcher priceMatcher = PRICE_PATTERN.matcher(rowText);
-                    if (priceMatcher.find()) {
-                        price = Integer.parseInt(priceMatcher.group(1).replace(",", ""));
+                    // 1. 먼저 화살표 뒤 판매가 시도 (정확한 판매가)
+                    Matcher sellingPriceMatcher = SELLING_PRICE_PATTERN.matcher(rowText);
+                    if (sellingPriceMatcher.find()) {
+                        price = Integer.parseInt(sellingPriceMatcher.group(1).replace(",", ""));
+                    } else {
+                        // 2. HTML에서 p1_bold 클래스 가격 추출 시도
+                        Element boldPrice = row.selectFirst(".p1_bold");
+                        if (boldPrice != null) {
+                            String boldText = boldPrice.text().replace(",", "");
+                            try {
+                                price = Integer.parseInt(boldText);
+                            } catch (NumberFormatException ignored) {}
+                        }
+                        // 3. 일반 가격 패턴 폴백
+                        if (price == 0) {
+                            Matcher priceMatcher = PRICE_PATTERN.matcher(rowText);
+                            if (priceMatcher.find()) {
+                                price = Integer.parseInt(priceMatcher.group(1).replace(",", ""));
+                            }
+                        }
                     }
                     
                     // 등급 추출 (우선순위: 최상 > 상 > 중 > 하)
-                    if (rowText.contains("최상") || rowText.contains("[중고-최상]")) {
+                    if (rowText.contains("[중고-최상]") || rowText.contains("최상")) {
                         quality = "최상";
-                    } else if (rowText.contains("[중고-상]") || (rowText.contains("상") && !rowText.contains("최상"))) {
+                    } else if (rowText.contains("[중고-상]")) {
                         quality = "상";
                     } else if (rowText.contains("[중고-중]")) {
                         quality = "중";
@@ -379,18 +397,62 @@ public class AladinCrawlerService {
             }
         }
         
-        // 방법 2: ItemId가 포함된 링크도 확인 (기존 로직)
+        // 방법 2: ItemId가 포함된 링크도 확인 (기존 로직) - 가격/등급 추출 추가
         Elements itemLinks = doc.select("a[href*='ItemId=']");
         for (Element link : itemLinks) {
             String linkTitle = link.text().trim();
             if (isTitleMatch(linkTitle, bookTitle)) {
-                log.info("✅ 판매자 {} 책 발견 (ItemId 링크): '{}'", sellerCode, bookTitle);
+                // 가격, 등급 추출 시도 (상위 행에서)
+                int price = 0;
+                String quality = "중";
+                
+                Element row = link.closest("tr, td, .ss_book_box, div[class*='book'], li");
+                if (row != null) {
+                    String rowText = row.text();
+                    String rowHtml = row.html();
+                    
+                    // 1. 먼저 화살표 뒤 판매가 시도 (정확한 판매가)
+                    Matcher sellingPriceMatcher = SELLING_PRICE_PATTERN.matcher(rowText);
+                    if (sellingPriceMatcher.find()) {
+                        price = Integer.parseInt(sellingPriceMatcher.group(1).replace(",", ""));
+                    } else {
+                        // 2. HTML에서 p1_bold 클래스 가격 추출 시도
+                        Element boldPrice = row.selectFirst(".p1_bold");
+                        if (boldPrice != null) {
+                            String boldText = boldPrice.text().replace(",", "");
+                            try {
+                                price = Integer.parseInt(boldText);
+                            } catch (NumberFormatException ignored) {}
+                        }
+                        // 3. 일반 가격 패턴 폴백
+                        if (price == 0) {
+                            Matcher priceMatcher = PRICE_PATTERN.matcher(rowText);
+                            if (priceMatcher.find()) {
+                                price = Integer.parseInt(priceMatcher.group(1).replace(",", ""));
+                            }
+                        }
+                    }
+                    
+                    // 등급 추출
+                    if (rowText.contains("[중고-최상]") || rowText.contains("최상")) {
+                        quality = "최상";
+                    } else if (rowText.contains("[중고-상]")) {
+                        quality = "상";
+                    } else if (rowText.contains("[중고-중]")) {
+                        quality = "중";
+                    } else if (rowText.contains("[중고-하]")) {
+                        quality = "하";
+                    }
+                }
+                
+                log.info("✅ 판매자 {} 책 발견: '{}' (등급: {}, 가격: {}원)", 
+                         sellerCode, bookTitle, quality, price);
                 
                 return Optional.of(SellerBookItem.builder()
                         .itemId(itemId)
                         .title(bookTitle)
-                        .quality("중")  // 기본 등급
-                        .price(0)
+                        .quality(quality)
+                        .price(price)
                         .build());
             }
         }

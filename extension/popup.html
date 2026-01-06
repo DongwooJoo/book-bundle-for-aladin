@@ -9,21 +9,39 @@
 <body>
   <div class="container">
     <header class="header">
-      <h1>📚 북번들</h1>
+      <div class="header-inner">
+        <div class="header-icon">
+          <svg viewBox="0 0 28 28" fill="none">
+            <rect x="3" y="5" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <rect x="9" y="3" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5" fill="rgba(255,255,255,0.2)"/>
+            <line x1="12" y1="8" x2="22" y2="8" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="12" y1="16" x2="18" y2="16" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="header-text">
+          <h1>북번들</h1>
       <p class="subtitle">알라딘 장바구니 책 추출</p>
+        </div>
+      </div>
     </header>
 
     <main class="main">
       <!-- 상태 메시지 -->
       <div id="status" class="status">
-        <div class="status-icon">⏳</div>
+        <div class="status-icon">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <circle cx="7" cy="7" r="2" fill="currentColor"/>
+          </svg>
+        </div>
         <div class="status-text">페이지 확인 중...</div>
       </div>
 
       <!-- 책 목록 (추출 후 표시) -->
       <div id="book-list" class="book-list" style="display: none;">
         <div class="book-count">
-          <span id="book-count-number">0</span>권 발견
+          발견된 책 <span id="book-count-number">0</span>
         </div>
         <ul id="books"></ul>
       </div>
@@ -31,10 +49,17 @@
       <!-- 버튼 영역 -->
       <div class="actions">
         <button id="extract-btn" class="btn btn-primary" disabled>
-          📥 책 정보 추출
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2v10M5 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 14h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          책 정보 추출
         </button>
         <button id="send-btn" class="btn btn-success" style="display: none;">
-          🚀 북번들로 전송
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M2 9h14M12 5l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          북번들로 전송
         </button>
       </div>
     </main>
@@ -47,4 +72,3 @@
   <script src="popup.js"></script>
 </body>
 </html>
-

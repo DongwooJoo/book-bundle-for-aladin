@@ -9,8 +9,27 @@ interface BundleResultViewProps {
 const INITIAL_DISPLAY_COUNT = 5;
 
 export function BundleResultView({ result, onClose }: BundleResultViewProps) {
-  const { sellers, totalRequestedCount, hasCompleteSeller, analysisTimeMs } = result;
+  const { sellers, totalRequestedCount, hasCompleteSeller, analysisTimeMs, requestedBooks } = result;
   const [showAll, setShowAll] = useState(false);
+  const [expandedSellers, setExpandedSellers] = useState<Set<string>>(new Set());
+
+  const toggleSellerExpanded = (sellerCode: string) => {
+    setExpandedSellers(prev => {
+      const next = new Set(prev);
+      if (next.has(sellerCode)) {
+        next.delete(sellerCode);
+      } else {
+        next.add(sellerCode);
+      }
+      return next;
+    });
+  };
+
+  // itemId로 요청한 책의 커버 이미지 찾기
+  const getBookCover = (itemId: number): string | undefined => {
+    const book = requestedBooks.find(b => b.itemId === itemId);
+    return book?.cover;
+  };
 
   const displayedSellers = showAll ? sellers : sellers.slice(0, INITIAL_DISPLAY_COUNT);
   const remainingCount = sellers.length - INITIAL_DISPLAY_COUNT;
@@ -141,7 +160,7 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
       ) : (
         <>
           <div className="space-y-4">
-            {displayedSellers.map((seller, index) => {
+            {displayedSellers.map((seller) => {
               const coveragePercent = Math.round(
                 (seller.totalBookCount / totalRequestedCount) * 100
               );
@@ -172,31 +191,6 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
                   <div className="p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        {/* Rank Badge */}
-                        <span 
-                          style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            backgroundColor: index === 0 
-                              ? 'var(--color-blue)' 
-                              : index === 1
-                              ? 'var(--color-blue)'
-                              : index === 2
-                              ? 'var(--color-blue)'
-                              : 'var(--color-background-tertiary)',
-                            color: index < 3 ? 'white' : 'var(--color-text-secondary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            fontWeight: 'var(--font-weight-semibold)',
-                            opacity: index === 0 ? 1 : index === 1 ? 0.8 : index === 2 ? 0.6 : 1,
-                            border: index >= 3 ? '1px solid var(--color-border)' : 'none'
-                          }}
-                        >
-                          {index + 1}
-                        </span>
                         <div>
                           <h3 style={{ 
                             fontSize: '17px',
@@ -254,53 +248,122 @@ export function BundleResultView({ result, onClose }: BundleResultViewProps) {
                       </div>
                     </div>
 
-                    {/* Book List */}
-                    <div className="space-y-2">
-                      {seller.books.map((book) => (
-                        <div
-                          key={book.itemId}
-                          className="flex items-center justify-between p-3 rounded-lg"
-                          style={{ backgroundColor: 'var(--color-background)' }}
+                    {/* Book List Accordion */}
+                    <div>
+                      {/* Accordion Toggle Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSellerExpanded(seller.sellerCode);
+                        }}
+                        className="w-full flex items-center justify-between p-3 rounded-lg transition-colors"
+                        style={{ 
+                          backgroundColor: expandedSellers.has(seller.sellerCode) 
+                            ? 'var(--color-background)' 
+                            : 'var(--color-background)',
+                          border: '1px dashed var(--color-border)'
+                        }}
+                      >
+                        <span style={{ 
+                          fontSize: '14px',
+                          color: 'var(--color-text-secondary)',
+                          fontWeight: 'var(--font-weight-medium)'
+                        }}>
+                          보유 도서 {seller.books.length}권 상세보기
+                        </span>
+                        <svg 
+                          width="16" 
+                          height="16" 
+                          viewBox="0 0 16 16" 
+                          fill="none"
+                          style={{ 
+                            color: 'var(--color-text-tertiary)',
+                            transform: expandedSellers.has(seller.sellerCode) ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease'
+                          }}
                         >
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <svg 
-                              width="16" 
-                              height="16" 
-                              viewBox="0 0 16 16" 
-                              fill="none"
-                              style={{ color: 'var(--color-text-primary)', flexShrink: 0 }}
-                            >
-                              <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                              <path d="M5 8L7 10L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                            <span 
-                              className="truncate"
-                              style={{ 
-                                fontSize: '14px',
-                                color: 'var(--color-text-primary)'
-                              }}
-                            >
-                              {book.title}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                            {book.quality && (
-                              <span className="apple-tag" style={{ fontSize: '11px' }}>
-                                {book.quality}
-                              </span>
-                            )}
-                            {book.price !== undefined && book.price > 0 && (
-                              <span style={{ 
-                                fontSize: '14px',
-                                fontWeight: 'var(--font-weight-medium)',
-                                color: 'var(--color-text-primary)'
-                              }}>
-                                {book.price.toLocaleString()}원
-                              </span>
-                            )}
-                          </div>
+                          <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+
+                      {/* Expandable Book List */}
+                      <div
+                        style={{
+                          maxHeight: expandedSellers.has(seller.sellerCode) ? `${seller.books.length * 80}px` : '0px',
+                          overflow: 'hidden',
+                          transition: 'max-height 0.3s ease-in-out',
+                          marginTop: expandedSellers.has(seller.sellerCode) ? '8px' : '0px'
+                        }}
+                      >
+                        <div className="space-y-2">
+                          {seller.books.map((book) => {
+                            const cover = getBookCover(book.itemId);
+                            return (
+                              <div
+                                key={book.itemId}
+                                className="flex items-center gap-3 p-3 rounded-lg"
+                                style={{ backgroundColor: 'var(--color-background)' }}
+                              >
+                                {/* Book Cover */}
+                                <div 
+                                  className="apple-book-cover"
+                                  style={{ width: '40px', height: '52px', flexShrink: 0 }}
+                                >
+                                  {cover ? (
+                                    <img src={cover} alt={book.title} />
+                                  ) : (
+                                    <div 
+                                      className="w-full h-full flex items-center justify-center"
+                                      style={{ color: 'var(--color-text-tertiary)', fontSize: '16px' }}
+                                    >
+                                      📚
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Book Info */}
+                                <div className="flex-1 min-w-0">
+                                  <h4 
+                                    className="truncate"
+                                    style={{ 
+                                      fontSize: '14px',
+                                      fontWeight: 'var(--font-weight-medium)',
+                                      color: 'var(--color-text-primary)',
+                                      lineHeight: 1.3
+                                    }}
+                                  >
+                                    {book.title}
+                                  </h4>
+                                  {book.quality && (
+                                    <span 
+                                      style={{ 
+                                        fontSize: '12px',
+                                        color: 'var(--color-text-secondary)',
+                                        marginTop: '2px',
+                                        display: 'inline-block'
+                                      }}
+                                    >
+                                      {book.quality}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Price */}
+                                {book.price !== undefined && book.price > 0 && (
+                                  <span style={{ 
+                                    fontSize: '14px',
+                                    fontWeight: 'var(--font-weight-semibold)',
+                                    color: 'var(--color-text-primary)',
+                                    flexShrink: 0
+                                  }}>
+                                    {book.price.toLocaleString()}원
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </div>
 

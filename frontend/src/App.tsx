@@ -23,7 +23,23 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [importedFromExtension, setImportedFromExtension] = useState(false);
   const [showBookList, setShowBookList] = useState(false);
-  const [addedBookAnimation, setAddedBookAnimation] = useState<{ id: number; title: string } | null>(null);
+  const [addedBookAnimation, setAddedBookAnimation] = useState<{ id: number; title: string; key: number } | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [hasSearchResults, setHasSearchResults] = useState(false);
+
+  // 스크롤 위치 감지
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // 맨 위로 스크롤
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // 컴팩트 모드: 책 목록 보기를 클릭했거나 결과가 있을 때
   const isCompactMode = showBookList || bundleResult !== null;
@@ -78,8 +94,8 @@ function App() {
     if (books.some((b) => b.itemId === book.itemId)) return;
     setBooks([...books, book]);
     
-    // 책 추가 애니메이션
-    setAddedBookAnimation({ id: book.itemId, title: book.title });
+    // 책 추가 애니메이션 - key를 매번 새로 생성하여 애니메이션 재시작
+    setAddedBookAnimation({ id: book.itemId, title: book.title, key: Date.now() });
     setTimeout(() => setAddedBookAnimation(null), 1500);
   };
 
@@ -89,6 +105,10 @@ function App() {
 
   const handleUpdateQuality = (itemId: number, quality: Quality) => {
     setBooks(books.map((b) => b.itemId === itemId ? { ...b, minQuality: quality } : b));
+  };
+
+  const handleUpdateAllQuality = (quality: Quality) => {
+    setBooks(books.map((b) => ({ ...b, minQuality: quality })));
   };
 
   const handleAnalyze = async () => {
@@ -147,139 +167,148 @@ function App() {
               </span>
             </a>
 
-            {/* Book basket button */}
-            {books.length > 0 && (
-              <button
-                onClick={() => setShowBookList(true)}
-                className="flex items-center gap-2"
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: 'var(--color-blue)',
-                  color: 'white',
-                  borderRadius: '980px',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  position: 'relative',
-                  animation: addedBookAnimation ? 'cartBounce 0.5s ease' : 'none'
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M2 4h2l2 9h8l2-7H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                  <circle cx="7" cy="15" r="1" fill="currentColor"/>
-                  <circle cx="13" cy="15" r="1" fill="currentColor"/>
-                </svg>
-                <span>내 책 목록 ({books.length})</span>
-                {addedBookAnimation && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: '-8px',
-                      right: '-8px',
-                      width: '20px',
-                      height: '20px',
-                      backgroundColor: 'var(--color-green)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      animation: 'popIn 0.3s ease'
-                    }}
-                  >
-                    +1
-                  </span>
-                )}
-              </button>
-            )}
+            {/* Book basket button - Always visible */}
+            <button
+              key={addedBookAnimation?.key || 'basket-button'}
+              onClick={() => setShowBookList(true)}
+              className="flex items-center gap-2"
+              style={{
+                padding: '8px 16px',
+                backgroundColor: books.length > 0 ? 'var(--color-blue)' : 'var(--color-background-tertiary)',
+                color: books.length > 0 ? 'white' : 'var(--color-text-secondary)',
+                borderRadius: '980px',
+                border: books.length > 0 ? 'none' : '1px solid var(--color-border)',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                animation: addedBookAnimation ? 'cartBounce 0.5s ease' : 'none'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M2 4h2l2 9h8l2-7H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <circle cx="7" cy="15" r="1" fill="currentColor"/>
+                <circle cx="13" cy="15" r="1" fill="currentColor"/>
+              </svg>
+              <span>내 책 목록{books.length > 0 ? ` (${books.length})` : ''}</span>
+              {addedBookAnimation && (
+                <span
+                  key={`badge-${addedBookAnimation.key}`}
+                  style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    width: '20px',
+                    height: '20px',
+                    backgroundColor: 'var(--color-green)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    animation: 'popIn 0.3s ease'
+                  }}
+                >
+                  +1
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </nav>
-
-      {/* Book Added Animation Toast */}
-      {addedBookAnimation && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '70px',
-            right: '24px',
-            backgroundColor: 'var(--color-green)',
-            color: 'white',
-            padding: '12px 20px',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            animation: 'flyToCart 0.5s ease-out'
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-            <path d="M6 10L9 13L14 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span style={{ fontWeight: 500 }}>책이 담겼습니다!</span>
-        </div>
-      )}
 
       {/* Main Content */}
       <main className="flex-1">
         {!isCompactMode ? (
           /* ============ INITIAL STATE: Google-like Search ============ */
           <div 
-            className="flex flex-col items-center justify-center"
-            style={{ minHeight: 'calc(100vh - 52px - 80px)' }}
+            className="flex flex-col items-center transition-all duration-300"
+            style={{ paddingTop: hasSearchResults ? '24px' : '15vh' }}
           >
-            <div className="w-full px-6 py-16 text-center" style={{ maxWidth: '720px' }}>
-              {/* Logo & Title */}
-              <div className="mb-8 animate-fadeInUp">
-                <div 
-                  className="inline-flex items-center justify-center mb-6"
-                  style={{
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '24px',
-                    backgroundColor: 'var(--color-blue)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  <svg width="40" height="40" viewBox="0 0 28 28" fill="none">
-                    <rect x="3" y="5" width="16" height="20" rx="2" stroke="white" strokeWidth="1.5" fill="none"/>
-                    <rect x="9" y="3" width="16" height="20" rx="2" stroke="white" strokeWidth="1.5" fill="rgba(255,255,255,0.2)"/>
-                    <line x1="12" y1="8" x2="22" y2="8" stroke="white" strokeWidth="1.5"/>
-                    <line x1="12" y1="12" x2="22" y2="12" stroke="white" strokeWidth="1.5"/>
-                    <line x1="12" y1="16" x2="18" y2="16" stroke="white" strokeWidth="1.5"/>
-                  </svg>
+            <div className="w-full px-6 text-center" style={{ maxWidth: '640px' }}>
+              {/* Logo & Title - Inline (Collapsible) */}
+              <div 
+                className="overflow-hidden transition-all duration-300"
+                style={{ 
+                  maxHeight: hasSearchResults ? '0px' : '100px',
+                  opacity: hasSearchResults ? 0 : 1,
+                  marginBottom: hasSearchResults ? '0' : '24px',
+                }}
+              >
+                <div className="inline-flex items-center justify-center gap-4">
+                  <div 
+                    className="flex items-center justify-center"
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '16px',
+                      backgroundColor: 'var(--color-blue)',
+                      boxShadow: '0 4px 16px rgba(0, 113, 227, 0.3)'
+                    }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <rect x="3" y="5" width="16" height="20" rx="2" stroke="white" strokeWidth="1.5" fill="none"/>
+                      <rect x="9" y="3" width="16" height="20" rx="2" stroke="white" strokeWidth="1.5" fill="rgba(255,255,255,0.2)"/>
+                      <line x1="12" y1="8" x2="22" y2="8" stroke="white" strokeWidth="1.5"/>
+                      <line x1="12" y1="12" x2="22" y2="12" stroke="white" strokeWidth="1.5"/>
+                      <line x1="12" y1="16" x2="18" y2="16" stroke="white" strokeWidth="1.5"/>
+                    </svg>
+                  </div>
+                  <h1 style={{ 
+                    fontSize: '32px',
+                    fontWeight: 'var(--font-weight-semibold)',
+                    letterSpacing: '-0.02em',
+                    color: 'var(--color-text-primary)',
+                  }}>
+                    북번들
+                  </h1>
                 </div>
-                <h1 className="text-headline">북번들</h1>
-                <p className="text-intro mt-3">
-                  여러 책을 한 판매자에게서 구매하고 배송비를 아끼세요
-                </p>
               </div>
 
               {/* Search Box */}
-              <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+              <div>
                 <BookSearch
                   onAddBook={handleAddBook}
                   selectedBookIds={books.map((b) => b.itemId)}
                   compact={false}
+                  onSearchStateChange={setHasSearchResults}
                 />
               </div>
 
-              {/* Tips */}
+              {/* Subtitle as hint (Collapsible) */}
               <div 
-                className="mt-12 animate-fadeInUp" 
-                style={{ animationDelay: '0.2s' }}
+                className="overflow-hidden transition-all duration-300"
+                style={{ 
+                  maxHeight: hasSearchResults ? '0px' : '60px',
+                  opacity: hasSearchResults ? 0 : 1,
+                  marginTop: hasSearchResults ? '0' : '16px',
+                  paddingTop: '8px'
+                }}
               >
-                <p className="text-caption mb-4">이렇게 사용하세요</p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  <span className="apple-tag">1. 책 검색 후 추가</span>
-                  <span className="apple-tag">2. 2권 이상 모으기</span>
-                  <span className="apple-tag">3. 판매자 찾기 클릭</span>
+                <p style={{ 
+                  fontSize: '15px',
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.5
+                }}>
+                  여러 책을 한 판매자에게서 구매하고 배송비를 아끼세요
+                </p>
+              </div>
+
+              {/* Tips - More compact (Collapsible) */}
+              <div 
+                className="overflow-hidden transition-all duration-300"
+                style={{ 
+                  maxHeight: hasSearchResults ? '0px' : '60px',
+                  opacity: hasSearchResults ? 0 : 1,
+                  marginTop: hasSearchResults ? '0' : '32px'
+                }}
+              >
+                <div className="flex flex-wrap justify-center gap-2">
+                  <span className="apple-tag" style={{ fontSize: '11px' }}>1. 책 검색</span>
+                  <span className="apple-tag" style={{ fontSize: '11px' }}>2. 2권 이상 추가</span>
+                  <span className="apple-tag" style={{ fontSize: '11px' }}>3. 판매자 찾기</span>
                 </div>
               </div>
             </div>
@@ -349,6 +378,7 @@ function App() {
             books={books}
             onRemoveBook={handleRemoveBook}
             onUpdateQuality={handleUpdateQuality}
+            onUpdateAllQuality={handleUpdateAllQuality}
             onAnalyze={handleAnalyze}
             isAnalyzing={isAnalyzing}
           />
@@ -397,6 +427,62 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          aria-label="맨 위로 이동"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--color-background)',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99,
+            transition: 'all 0.2s ease',
+            animation: 'fadeIn 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-blue)';
+            e.currentTarget.style.borderColor = 'var(--color-blue)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+            const svg = e.currentTarget.querySelector('svg');
+            if (svg) svg.style.color = 'white';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--color-background)';
+            e.currentTarget.style.borderColor = 'var(--color-border)';
+            e.currentTarget.style.transform = 'scale(1)';
+            const svg = e.currentTarget.querySelector('svg');
+            if (svg) svg.style.color = 'var(--color-text-secondary)';
+          }}
+        >
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 20 20" 
+            fill="none"
+            style={{ color: 'var(--color-text-secondary)', transition: 'color 0.2s ease' }}
+          >
+            <path 
+              d="M4 12L10 6L16 12" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
 
       {/* Footer */}
       <footer className="apple-footer">

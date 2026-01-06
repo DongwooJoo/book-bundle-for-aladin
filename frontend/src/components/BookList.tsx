@@ -4,6 +4,7 @@ interface BookListProps {
   books: BookItem[];
   onRemoveBook: (itemId: number) => void;
   onUpdateQuality: (itemId: number, quality: Quality) => void;
+  onUpdateAllQuality: (quality: Quality) => void;
   onAnalyze: () => void;
   isAnalyzing: boolean;
 }
@@ -13,7 +14,8 @@ const QUALITY_OPTIONS: Quality[] = ['최상', '상', '중'];
 export function BookList({ 
   books, 
   onRemoveBook, 
-  onUpdateQuality, 
+  onUpdateQuality,
+  onUpdateAllQuality,
   onAnalyze,
   isAnalyzing 
 }: BookListProps) {
@@ -76,12 +78,44 @@ export function BookList({
         </div>
       ) : (
         <>
-          {/* Book List */}
+          {/* Bulk Quality Change Buttons */}
           <div 
-            className="space-y-2 mb-6" 
-            style={{ maxHeight: '320px', overflowY: 'auto', marginRight: '-8px', paddingRight: '8px' }}
+            className="mb-4 p-3 flex items-center gap-3 flex-wrap"
+            style={{ 
+              backgroundColor: 'var(--color-background-secondary)',
+              borderRadius: 'var(--radius-md)'
+            }}
           >
-            {books.map((book, index) => (
+            <span 
+              style={{ 
+                fontSize: '13px', 
+                color: 'var(--color-text-secondary)',
+                fontWeight: 'var(--font-weight-medium)'
+              }}
+            >
+              전체 등급 변경
+            </span>
+            <div className="flex gap-2">
+              {QUALITY_OPTIONS.map((quality) => (
+                <button
+                  key={quality}
+                  onClick={() => onUpdateAllQuality(quality)}
+                  className="apple-button apple-button-secondary apple-button-small"
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    borderRadius: '980px'
+                  }}
+                >
+                  {quality} 이상
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Book List */}
+          <div className="space-y-2 mb-6">
+            {books.map((book) => (
               <div
                 key={book.itemId}
                 className="flex items-center gap-3 p-3"
@@ -91,25 +125,6 @@ export function BookList({
                   transition: 'all var(--transition-fast)'
                 }}
               >
-                {/* Number Badge */}
-                <span 
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--color-blue)',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'var(--font-weight-semibold)',
-                    flexShrink: 0
-                  }}
-                >
-                  {index + 1}
-                </span>
-                
                 {/* Book Cover */}
                 <div 
                   className="apple-book-cover"
@@ -171,19 +186,38 @@ export function BookList({
                 {/* Remove Button */}
                 <button
                   onClick={() => onRemoveBook(book.itemId)}
-                  className="apple-button-link"
+                  className="remove-book-btn"
                   style={{ 
-                    padding: '8px',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'var(--color-background)',
+                    border: '1px solid var(--color-border)',
                     color: 'var(--color-text-tertiary)',
-                    transition: 'color var(--transition-fast)'
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-primary)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-tertiary)'}
-                  title="삭제"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-text-secondary)';
+                    e.currentTarget.style.borderColor = 'var(--color-text-secondary)';
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-background)';
+                    e.currentTarget.style.borderColor = 'var(--color-border)';
+                    e.currentTarget.style.color = 'var(--color-text-tertiary)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                  title="목록에서 삭제"
                 >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <line x1="4" y1="4" x2="12" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                    <line x1="12" y1="4" x2="4" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <line x1="4" y1="4" x2="12" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="12" y1="4" x2="4" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                   </svg>
                 </button>
               </div>
