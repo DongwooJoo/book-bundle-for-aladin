@@ -171,12 +171,46 @@ book-bundle-for-aladin/
 
 ---
 
-## ⚠️ 주의사항
+## ⚠️ 면책 조항 (Disclaimer)
 
-- 이 서비스는 알라딘 웹사이트를 크롤링하여 정보를 수집합니다
-- 알라딘 서버 부하를 고려하여 요청 간격을 500ms로 설정했습니다
-- 이 서비스는 알라딘과 무관한 개인 프로젝트입니다
+### 🇰🇷 한국어
 
-## 📝 라이선스
+이 프로젝트는 **교육 및 개인 학습 목적**으로 만들어졌습니다.
 
-MIT License
+- 이 소프트웨어는 알라딘(Aladin)과 **무관한 개인 프로젝트**입니다
+- 이 소프트웨어는 **웹 크롤링 기술**을 사용하며, 대상 사이트의 이용약관 및 robots.txt 정책에 따라 **사용이 제한될 수 있습니다**
+- 이 도구의 사용으로 인한 모든 법적 책임은 **사용자 본인**에게 있습니다
+- **상업적 목적의 사용을 금지**합니다
+- 저작권자(알라딘)의 요청이 있을 경우 즉시 저장소를 비공개로 전환할 예정입니다
+- 알라딘 서버에 과도한 부하를 주지 않도록 요청 간격(500ms)이 설정되어 있으나, 이는 완전한 보호를 보장하지 않습니다
+
+**이 소프트웨어를 사용하기 전에 반드시 [알라딘 이용약관](https://www.aladin.co.kr)과 관련 법률을 확인하세요.**
+
+### 🇺🇸 English
+
+This project was created for **educational and personal learning purposes**.
+
+- This software is an **independent personal project** and is NOT affiliated with Aladin (알라딘)
+- This software uses **web crawling technology**, which may be restricted according to the target site's Terms of Service and robots.txt policy
+- All legal responsibility for using this tool lies with **the user**
+- **Commercial use is prohibited**
+- This repository will be made private immediately upon request from the copyright holder (Aladin)
+- Request intervals (500ms) are configured to avoid excessive load on Aladin's servers, but this does not guarantee complete protection
+
+**Before using this software, please check [Aladin's Terms of Service](https://www.aladin.co.kr) and relevant laws.**
+
+---
+
+## 📝 라이선스 (License)
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+
+This project is distributed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 기여 (Contributing)
+
+이슈 및 풀 리퀘스트는 환영합니다. 단, 이 프로젝트의 목적(교육/개인 학습)을 벗어나는 기여는 받지 않습니다.
+
+Issues and pull requests are welcome. However, contributions that deviate from the purpose of this project (education/personal learning) will not be accepted.
